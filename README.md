@@ -39,7 +39,7 @@
     FUNASR_MODEL_ID="iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
 
     # 模型文件的缓存目录
-    MODEL_CACHE_DIR="./model_cache"
+    MODEL_CACHE_DIR="model_cache"
     ```
 
 ### 3. 启动服务
