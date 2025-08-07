@@ -87,7 +87,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```bash
 curl --location 'http://localhost:8000/v1/audio/transcriptions' \
 --header 'Authorization: Bearer your-secret-api-key' \
---form 'file=@"/path/to/your/audio.wav"' \
+--form 'file=@"/path/to/test_audio.wav"' \
 --form 'model="paraformer-large"' \
 --form 'response_format="verbose_json"' \
 --form 'prompt="达摩院,模型服务"'
@@ -124,7 +124,7 @@ API_URL = "http://localhost:8000/v1/audio/transcriptions"
 # 你的 API 密钥
 API_KEY = "your-secret-api-key"
 # 本地音频文件路径
-FILE_PATH = "tests/test_audio.wav" # 请替换为你的文件路径
+FILE_PATH = "test_audio.wav" # 请替换为你的文件路径
 
 # 确保文件存在
 if not os.path.exists(FILE_PATH):
