@@ -1,7 +1,3 @@
-好的，这是一个可以直接使用的 `README.md` 文件。它包含了项目简介、运行指南以及 `curl` 和 Python 的 API 调用示例。
-
----
-
 # FunASR OpenAI-Compatible API
 
 这是一个使用 FastAPI 搭建的生产级 API 服务器，它将阿里巴巴达摩院的 FunASR 语音识别模型封装成一个与 OpenAI `/v1/audio/transcriptions` 端点兼容的 API。
