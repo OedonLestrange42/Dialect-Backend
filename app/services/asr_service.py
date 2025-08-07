@@ -2,6 +2,8 @@ import torch
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 from app.core.config import settings
+import logging
+logger = logging.getLogger(__name__)
 
 
 class ASRService:
@@ -38,13 +40,17 @@ class ASRService:
             dict: FunASR 模型返回的原始识别结果.
         """
         print(f"ASR Service: Transcribing audio file: {audio_file_path}")
+        try:
+            rec_result = self.pipeline(
+                input=audio_file_path,
+                hotword=hotword
+            )
+            print("ASR Service: Transcription completed.")
+            return rec_result
+        except Exception as e:
+            logger.error(f"Transcription error: {str(e)}", exc_info=True)
+            return None
 
-        rec_result = self.pipeline(
-            audio_in=audio_file_path,
-            hotword=hotword if hotword else ""
-        )
-        print("ASR Service: Transcription completed.")
-        return rec_result
 
 
 # 在 main.py 中实例化
