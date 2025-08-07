@@ -30,7 +30,7 @@ async def create_transcription(
         file: Annotated[UploadFile, File(...)],
         model: Annotated[str, Form(...)],  # 虽然接收但暂时不用，因为模型已加载
         response_format: Annotated[AudioResponseFormat, Form()] = AudioResponseFormat.JSON,
-        prompt: Annotated[str, Form(None)] = None,  # 对应 FunASR 的 hotword
+        prompt: Annotated[str, Form()] = None,  # 对应 FunASR 的 hotword
         asr_service: ASRService = Depends(deps.get_asr_service)
 ):
     """
