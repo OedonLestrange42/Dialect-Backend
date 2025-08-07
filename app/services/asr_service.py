@@ -41,12 +41,21 @@ class ASRService:
         """
         print(f"ASR Service: Transcribing audio file: {audio_file_path}")
         try:
-            rec_result = self.pipeline(
+            rec_result_list = self.pipeline(
                 input=audio_file_path,
                 hotword=hotword
             )
             print("ASR Service: Transcription completed.")
-            return rec_result
+
+            if not rec_result_list:
+                return {"text": ""}
+
+            # 将列表中所有字典的 'text' 键的值连接起来
+            full_text = " ".join(item.get("text", "") for item in rec_result_list)
+
+            # 您可以返回一个包含完整文本的新字典
+            return {"text": full_text}
+
         except Exception as e:
             logger.error(f"Transcription error: {str(e)}", exc_info=True)
             return None

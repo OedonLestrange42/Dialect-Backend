@@ -9,6 +9,8 @@ from app.api import deps
 from app.services.asr_service import ASRService
 from app.services import formatters
 
+import logging
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -67,6 +69,7 @@ async def create_transcription(
 
     except Exception as e:
         # 处理可能的识别错误
+        logger.error(f"An error occurred during transcription: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"An error occurred during transcription: {str(e)}")
     finally:
         # 清理临时文件
