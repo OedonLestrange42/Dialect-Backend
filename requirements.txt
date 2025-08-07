@@ -1,0 +1,15 @@
+# API Framework
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Configuration
+pydantic-settings
+
+# ASR Model - FunASR and its dependencies
+modelscope
+funasr
+torch
+
+# For audio processing
+soundfile

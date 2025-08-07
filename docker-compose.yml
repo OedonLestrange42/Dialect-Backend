@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  funasr-api:
+    build: .
+    container_name: funasr_api_server
+    ports:
+      - "8000:8000"
+    volumes:
+      # 将本地的模型缓存目录映射到容器内
+      # 这样模型下载后会持久保存在主机上，避免容器重启后重新下载
+      - ./model_cache:/app/model_cache
+    # 如果你有支持CUDA的NVIDIA显卡和nvidia-docker2
+    # 取消下面的注释以启用GPU加速
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    env_file:
+      - .env
+    restart: unless-stopped
