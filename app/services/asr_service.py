@@ -38,9 +38,6 @@ class ASRService:
         Args:
             audio_file_path (str): 音频文件的路径
             hotword (str, optional): 用于提高特定词汇识别准确率的热词
-            enable_vad (bool): 是否启用语音活动检测
-            enable_punc (bool): 是否启用标点符号添加
-            enable_spk (bool): 是否启用说话人识别
 
         Returns:
             dict: 包含完整处理结果的字典
@@ -58,15 +55,13 @@ class ASRService:
             if not asr_result:
                 return result
             print("ASR Service: Complete pipeline processing finished.")
+            print("Complete asr_result:", asr_result)
             return asr_result[0]
 
         except Exception as e:
             logger.error(f"Pipeline processing error: {str(e)}", exc_info=True)
             return None
     
-
-
-
 
 # 在 main.py 中实例化
 asr_service_instance: ASRService = None

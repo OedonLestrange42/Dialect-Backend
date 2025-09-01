@@ -24,23 +24,16 @@ def to_simple_json(result: dict) -> dict:
 
 def to_verbose_json(result: dict) -> dict:
     """转换为 OpenAI 的详细 JSON 格式"""
-    full_text = result.get("text", "")
-    sentences = result.get("sentence_info", [])
+    new_result = {key: value for key, value in result.items() if key != 'timestamp'}
 
-    segments = []
-    for sent in sentences:
-        segments.append({
-            "id": len(segments),
-            "start": sent['start'] / 1000.0,
-            "end": sent['end'] / 1000.0,
-            "text": sent['text'].strip()
-        })
+    if 'sentence_info' in new_result:
+        processed_sentences = []
+        for sentence_dict in new_result['sentence_info']:
+            new_sentence = {key: value for key, value in sentence_dict.items() if key != 'timestamp'}
+            processed_sentences.append(new_sentence)
+        new_result['sentence_info'] = processed_sentences
 
-    return {
-        "text": full_text,
-        "segments": segments,
-        "language": "zh"
-    }
+    return new_result
 
 
 def to_srt(result: dict) -> str:
