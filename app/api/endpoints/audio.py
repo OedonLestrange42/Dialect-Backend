@@ -4,6 +4,7 @@ from enum import Enum
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
 from fastapi.responses import Response, JSONResponse, PlainTextResponse
 from typing import Annotated
+from fastapi import Request
 
 from app.api import deps
 from app.services.asr_service import ASRService
