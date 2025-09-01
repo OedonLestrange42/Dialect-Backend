@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.core.config import settings
-from app.services.asr_service import ASRService, asr_service_instance
+from app.services.asr_service import initialize_asr_service
 from app.api.endpoints import audio
 
 
@@ -11,11 +11,9 @@ async def lifespan(app: FastAPI):
     print("Application startup...")
     # 初始化 ASR 服务并将其存储在 app.state 中
     # 这是创建和管理单例的推荐方式
-    print(f"Loading FunASR model: {settings.FUNASR_MODEL_ID}")
-    app.state.asr_service = ASRService(
-        model_id=settings.FUNASR_MODEL_ID
-    )
-    print("ASR Service has been initialized.")
+    print(f"Loading ASR models: ASR={settings.FUNASR_MODEL_ID}, VAD={settings.VAD_MODEL_ID}, PUNC={settings.PUNC_MODEL_ID}, SPK={settings.SPK_MODEL_ID}")
+    app.state.asr_service = initialize_asr_service()
+    print("Complete ASR pipeline has been initialized.")
 
     yield
 
