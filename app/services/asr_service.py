@@ -193,7 +193,7 @@ class ASRService:
     def _run_speaker_recognition(self, audio_file_path: str) -> Optional[Dict[str, Any]]:
         """运行说话人识别"""
         try:
-            spk_result = self.spk_pipeline(input=audio_file_path)
+            spk_result = self.spk_pipeline(audio_in=audio_file_path)
             return spk_result
         except Exception as e:
             logger.error(f"Speaker recognition error: {str(e)}")
