@@ -58,11 +58,13 @@ class ASRService:
             if not asr_result:
                 return result
             print("ASR Service: Complete pipeline processing finished.")
-            return asr_result
+            return asr_result[0]
 
         except Exception as e:
             logger.error(f"Pipeline processing error: {str(e)}", exc_info=True)
             return None
+    
+
 
 
 
