@@ -81,3 +81,38 @@ async def create_transcription(
 
 
 
+
+@router.post("/v1/audio/chunk", tags=["Audio"])
+async def upload_chunk(request: Request):
+    form = await request.form()
+    chunk = form["file"]
+    file_md5 = form["fileMd5"]
+    chunk_index = int(form["chunkIndex"])
+    total_chunks = int(form["totalChunks"])
+    filename = form["filename"]
+    chunk_dir = f"/tmp/chunks/{file_md5}"
+    import os
+    os.makedirs(chunk_dir, exist_ok=True)
+    chunk_path = os.path.join(chunk_dir, f"chunk_{chunk_index}")
+    with open(chunk_path, "wb") as f:
+        f.write(await chunk.read())
+    return {"status": "ok", "chunk_index": chunk_index}
+
+@router.post("/v1/audio/merge", tags=["Audio"])
+async def merge_chunks(request: Request, asr_service: ASRService = Depends(deps.get_asr_service)):
+    data = await request.json()
+    file_md5 = data["fileMd5"]
+    chunk_dir = f"/tmp/chunks/{file_md5}"
+    import os
+    chunk_files = sorted([f for f in os.listdir(chunk_dir) if f.startswith("chunk_")], key=lambda x: int(x.split("_")[1]))
+    merged_path = os.path.join(chunk_dir, f"{file_md5}.wav")
+    with open(merged_path, "wb") as outfile:
+        for chunk_file in chunk_files:
+            with open(os.path.join(chunk_dir, chunk_file), "rb") as infile:
+                outfile.write(infile.read())
+    # 语音识别
+    result = asr_service.transcribe(merged_path)
+    return JSONResponse(content=formatters.to_simple_json(result))
+
+
+
