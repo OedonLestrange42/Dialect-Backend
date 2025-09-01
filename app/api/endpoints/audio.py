@@ -30,9 +30,12 @@ class AudioResponseFormat(str, Enum):
 )
 async def create_transcription(
         file: Annotated[UploadFile, File(...)],
-        model: Annotated[str, Form(...)],  # 虽然接收但暂时不用，因为模型已加载
+        model: Annotated[str, Form(...)],  
         response_format: Annotated[AudioResponseFormat, Form()] = AudioResponseFormat.JSON,
         prompt: Annotated[str, Form()] = None,  # 对应 FunASR 的 hotword
+        enable_vad: Annotated[bool, Form()] = True,  # 是否启用VAD语音活动检测
+        enable_punc: Annotated[bool, Form()] = True,  # 是否启用标点符号添加
+        enable_spk: Annotated[bool, Form()] = True,  # 是否启用说话人识别
         asr_service: ASRService = Depends(deps.get_asr_service)
 ):
     """
@@ -42,6 +45,9 @@ async def create_transcription(
     - **model**: 使用的模型ID。当前服务器实例只加载一个模型，此参数仅为兼容性保留。
     - **response_format**: 返回结果的格式。
     - **prompt**: 可选的提示词/热词，以提高特定词汇的识别准确率。
+    - **enable_vad**: 是否启用VAD语音活动检测，默认为True。
+    - **enable_punc**: 是否启用标点符号添加，默认为True。
+    - **enable_spk**: 是否启用说话人识别，默认为False。
     """
     # 使用临时文件处理上传的音频
     try:
@@ -53,7 +59,13 @@ async def create_transcription(
 
     try:
         # 执行语音识别
-        result = asr_service.transcribe(tmp_audio_path, hotword=prompt)
+        result = asr_service.transcribe(
+            tmp_audio_path, 
+            hotword=prompt,
+            enable_vad=enable_vad,
+            enable_punc=enable_punc,
+            enable_spk=enable_spk
+        )
 
         # 根据请求的格式返回结果
         if response_format == AudioResponseFormat.JSON:
