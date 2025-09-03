@@ -12,6 +12,9 @@ from app.services.asr_service import ASRService
 from app.services import formatters
 
 import logging
+# 新增导入：用于从 URL 流式下载
+import urllib.request
+import urllib.parse
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
@@ -212,6 +215,73 @@ async def merge_chunks(request: Request, asr_service: ASRService = Depends(deps.
             logger.warning(f"Cleanup failed for {base_dir}: {e}")
 
     return JSONResponse(content=formatters.to_verbose_json(result))
+
+
+# 新增：直接从 URL 拉取音频并识别
+@router.post("/v1/audio/from_url", dependencies=[Depends(deps.verify_api_key)], tags=["Audio"])
+async def transcribe_from_url(request: Request, asr_service: ASRService = Depends(deps.get_asr_service)):
+    """
+    从远程 URL（例如 MinIO 预签名链接）下载音频并进行识别，避免前端先下载。
+    期待 JSON: {
+      "url": "https://...",
+      "filename": "optional_filename.wav",
+      "response_format": "json|verbose_json|text|srt|vtt",
+      "prompt": "可选热词",
+      "headers": {"Authorization": "Bearer ..."}  # 可选，若需要鉴权
+    }
+    """
+    data = await request.json()
+    url = data.get("url")
+    if not url:
+        raise HTTPException(status_code=400, detail="url is required")
+
+    # 可选参数
+    filename = data.get("filename")
+    prompt = data.get("prompt")
+    response_format_str = (data.get("response_format") or AudioResponseFormat.JSON.value).lower()
+    headers = data.get("headers") or {}
+
+    # 推断文件名
+    if not filename:
+        parsed = urllib.parse.urlparse(url)
+        base = os.path.basename(parsed.path) or "audio_from_url"
+        filename = base
+
+    # 以临时文件保存。
+    tmp_path = None
+    try:
+        fd, tmp_path = tempfile.mkstemp(suffix=f"_{filename}")
+        os.close(fd)
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req) as resp, open(tmp_path, "wb") as out:
+            shutil.copyfileobj(resp, out)
+
+        # 执行识别
+        result = asr_service.transcribe(tmp_path, hotword=prompt)
+
+        # 返回格式处理
+        if response_format_str == AudioResponseFormat.JSON.value:
+            return JSONResponse(content=formatters.to_simple_json(result))
+        elif response_format_str == AudioResponseFormat.VERBOSE_JSON.value:
+            return JSONResponse(content=formatters.to_verbose_json(result))
+        elif response_format_str == AudioResponseFormat.TEXT.value:
+            return PlainTextResponse(content=formatters.to_text(result))
+        elif response_format_str == AudioResponseFormat.SRT.value:
+            return PlainTextResponse(content=formatters.to_srt(result), media_type="text/plain")
+        elif response_format_str == AudioResponseFormat.VTT.value:
+            return PlainTextResponse(content=formatters.to_vtt(result), media_type="text/plain")
+        else:
+            # 未知格式，默认 verbose_json
+            return JSONResponse(content=formatters.to_verbose_json(result))
+    except Exception as e:
+        logger.error(f"Failed to transcribe from URL: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to transcribe from URL: {str(e)}")
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.remove(tmp_path)
+            except Exception:
+                pass
 
 
 
