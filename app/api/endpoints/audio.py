@@ -211,7 +211,7 @@ async def merge_chunks(request: Request, asr_service: ASRService = Depends(deps.
         except Exception as e:
             logger.warning(f"Cleanup failed for {base_dir}: {e}")
 
-    return JSONResponse(content=formatters.to_simple_json(result))
+    return JSONResponse(content=formatters.to_verbose_json(result))
 
 
 
